@@ -4,8 +4,8 @@
         {
             "overlays": [
                 {
-                    "name": "APE / Tether US",
-                    "type": "Area",
+                    "name": "Index",
+                    "type": "AppleArea",
                     "main": true,
                     "data": [
                         [
@@ -16809,7 +16809,8 @@
                             5.556
                         ]
                     ],
-                    "settings": {},
+                    "settings": {
+                    },
                     "props": {
                     }
                 }

@@ -5,6 +5,7 @@ import { NightVision } from './index.js'
 import { onMount } from 'svelte'
 import data from '../data/data-ohlcv-rsi.json?id=main'
 import data2 from '../data/data-area.json?id=main-2'
+import data3 from '../data/data-aapl.json?id=main-3'
 import TestStack from '../tests/testStack.js'
 
 
@@ -28,7 +29,13 @@ import indexBased from '../tests/tfs-test/allIndexBased.js'
 
 // More tests
 import indicators from '../tests/indicators/indicators.js'
+import rangeTool from '../tests/tools/rangeTool.js'
+import lineTool from '../tests/tools/lineTool.js'
+import watchPropTest from '../tests/navy/watchPropTest.js'
 
+// More tests
+import logScaleTest from '../tests/scales/logScale.js'
+import memoryTest from '../tests/memory/memoryTest.js'
 
 /*
 TODO: data-api interface:
@@ -48,7 +55,7 @@ let chart = null
 
 onMount(() => {
     chart = new NightVision('chart-container', {
-        data: data2,
+        data: data,
         //autoResize: true,
         //indexBased: true
     })
@@ -81,14 +88,30 @@ onMount(() => {
 
     indicators(stack, chart)
 
+    stack.setGroup('tools-test')
+
+    //rangeTool(stack, chart)
+    lineTool(stack, chart)
+
+    stack.setGroup('navy-test')
+
+    watchPropTest(stack, chart)
+
+    stack.setGroup('scales-test')
+
+    logScaleTest(stack, chart)
+
+    stack.setGroup('memory-test')
+
+    memoryTest(stack, chart)
+
     //  Type in the console: stack.execAll()
-    //  or: stack.exec('<group>')
+    //  or: stack.exec('<group>')    
 
 })
 
 </script>
 <style>
-.app {}
 #chart-container {
     position: absolute;
     width: 100%;

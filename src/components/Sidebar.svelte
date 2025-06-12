@@ -18,6 +18,7 @@ import { fade } from 'svelte/transition'
 import ScaleSelector from './ScaleSelector.svelte'
 import Events from '../core/events.js'
 import Utils from '../stuff/utils.js'
+import Const from '../stuff/constants.js'
 import math from '../stuff/math.js'
 import dpr from '../stuff/dprCanvas.js'
 import sb from '../core/primitives/sidebar.js'
@@ -43,9 +44,11 @@ let sbUpdId = `sb-${id}-${side}`
 let sbId = `${props.id}-sb-${id}-${side}`
 let canvasId = `${props.id}-sb-canvas-${id}-${side}`
 let showSwitch = false
+let showPanel = true
 
 // EVENT INTERFACE
 events.on(`${sbUpdId}:update-sb`, update)
+events.on(`${sbUpdId}:show-sb-panel`, f => showPanel = f)
 
 $:sbStyle = `
     left: ${S * (layout.width + layout.sbMax[0])}px;
@@ -62,6 +65,7 @@ let mc // Mouse controller
 let zoom = 1
 let yRange
 let drug
+let updId 
 
 $:width = layout.width
 $:height = layout.height
@@ -71,6 +75,7 @@ onMount(async () => { await setup() })
 onDestroy(() => {
     events.off(`${sbUpdId}`)
     if (mc) mc.destroy()
+    clearInterval(updId)
 })
 
 async function setup() {
@@ -79,6 +84,12 @@ async function setup() {
 
     update()
     if (scale) await listeners()
+
+    // Start updates to show fresh candle time 
+    if (props.config.CANDLE_TIME && props.timeFrame >= Const.MINUTE) {
+        let dt = Const.SECOND / 5 
+        updId = setInterval(update, dt)
+    }
 }
 
 // TODO: add mouse wheel/touchpad zoom
@@ -172,13 +183,18 @@ function update($layout = layout) {
         return sb.error(props, layout, side, ctx)
     }
 
-    sb.body(props, layout, scale, side, ctx)
+    // Draw only when data extracted from the srcipts
+    //if (meta.ready) {
+        sb.body(props, layout, scale, side, ctx)
+    //} else {
+    //    sb.border(props, layout, side, ctx)
+    //}
 
     ovDrawCalls()
 
     if (id) sb.upperBorder(props, layout, ctx)
 
-    if (props.cursor.y && props.cursor.scales) {
+    if (props.cursor.y && props.cursor.scales && showPanel) {
         if (props.cursor.gridId === layout.id) {
             sb.panel(props, layout, scale, side, ctx)
         }
@@ -240,6 +256,7 @@ function calcRange(diff1 = 1, diff2 = 1) {
     return range
 }
 
+// TODO: log scale work with distortions when auto is disabled
 function rezoomRange(delta, diff1, diff2) {
 
     let yTransform = getYtransform()

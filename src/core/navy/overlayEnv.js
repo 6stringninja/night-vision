@@ -8,6 +8,8 @@ import DataHub from '../dataHub.js'
 import MetaHub from '../metaHub.js'
 import Scan from '../dataScanner.js'
 import Utils from '../../stuff/utils.js'
+import Mouse from '../input/mouse.js'
+import Keys from '../input/keys.js'
 
 // Build-in primitives
 import Candle from '../primitives/navyLib/candle.js'
@@ -17,8 +19,13 @@ import volumeBar from '../primitives/navyLib/volumeBar.js'
 import Volbar from '../primitives/navyLib/volbar.js'
 import layoutCnv from '../primitives/navyLib/layoutCnvFast.js'
 import avgVolume from '../primitives/navyLib/avgVolume.js'
+import roundRect from '../primitives/navyLib/roundRect.js'
+import drawArrow from '../primitives/navyLib/arrow.js'
+import TrendLine from '../primitives/navyLib/trendLine.js'
+import Segment from '../primitives/navyLib/seg.js'
+import Pin from '../primitives/navyLib/pin.js'
 import {
-    fastSma, candleColor
+    fastSma, candleColor, rescaleFont
 } from '../primitives/navyLib/helperFns.js'
 
 const formatCash = Utils.formatCash
@@ -36,18 +43,27 @@ export default class OverlayEnv {
         this.ovSrc = ovSrc
         this.overlay = null // Overlay instance ref
         this.id = id
+        this.handlers = {}
 
-        this.$core = { hub, meta, scan }
+        this.$core = { hub, meta, scan, events }
         this.update(ovSrc, layout, props)
 
         this.$props = ovSrc.props
         this.$events = events
 
+        this.$core.mouse = new Mouse(this.$core)
+        this.$core.keys = new Keys(this.$core)
+
         this.lib = {
             Candle, Volbar, layoutCnv, formatCash,
             candleBody, candleWick, volumeBar,
-            fastSma, avgVolume, candleColor
+            fastSma, avgVolume, candleColor, 
+            roundRect, rescaleFont, drawArrow, 
+            TrendLine, Segment, Pin,
+            Utils
         }
+
+        this.$core.lib = this.lib 
 
     }
 
@@ -68,6 +84,7 @@ export default class OverlayEnv {
         core.dataSubset = overlay.dataSubset
         core.data = overlay.data
         core.view = overlay.dataView
+        core.dataExt = overlay.dataExt
         core.id = overlay.id
         core.paneId = core.layout.id
         // TODO: core.fullLayout = ...
@@ -107,5 +124,46 @@ export default class OverlayEnv {
                 return i
             }
         }
+    }
+
+    watchProp(propName, handler) {
+        // Save the handler
+        this.handlers[propName] = this.handlers[propName] || []
+        this.handlers[propName].push(handler)
+
+        // Save the current property value
+        let oldValue = this.$props[propName]
+
+        // Remove the property from $props
+        delete this.$props[propName]
+
+        // Redefine the property with custom setter
+        Object.defineProperty(this.$props, propName, {
+            get: () => oldValue,
+            set: (newValue) => {
+                let tmp = oldValue
+                oldValue = newValue
+
+                // Call all handlers
+                for (let handler of this.handlers[propName]) {
+                    handler(newValue, tmp)
+                }
+            },
+            enumerable: true,
+            configurable: true
+        })
+    }
+
+    destroy() {
+
+        // Restore non-reactive properties
+        for (let prop in this.handlers) {
+            let value = this.$props[prop]
+            delete this.$props[prop]
+            this.$props[prop] = value
+        }
+
+        // Clear all handlers
+        this.handlers = {}
     }
 }

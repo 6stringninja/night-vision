@@ -237,6 +237,11 @@ class NightVision {
         if (d > 0) this.goto(this.range[1] + int)
     }
 
+    // Should call this to clean-up memory / events
+    destroy() {
+        this.comp.$destroy()
+        this.ww.stop()
+    } 
 }
 
 export {

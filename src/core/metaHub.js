@@ -18,6 +18,7 @@ class MetaHub {
         events.on('meta:sidebar-transform', this.onYTransform.bind(this))
         events.on('meta:select-overlay', this.onOverlaySelect.bind(this))
         events.on('meta:grid-mousedown', this.onGridMousedown.bind(this))
+        events.on('meta:scroll-lock', this.onScrollLock.bind(this))
 
         // Persistent meta storage
         this.storage = {}
@@ -26,6 +27,7 @@ class MetaHub {
     init(props) {
 
         this.panes = 0 // Panes processed
+        this.ready = false
         // [API] read-only
         this.legendFns = [] // Legend formatters
         this.yTransforms = [] // yTransforms of sidebars
@@ -44,6 +46,7 @@ class MetaHub {
         }*/
         this.ohlcMap = [] // time => OHLC map of the main ov
         this.ohlcFn = undefined // OHLC mapper function
+        this.scrollLock = false // Scroll lock state
 
     }
 
@@ -67,7 +70,8 @@ class MetaHub {
         var lfs = this.legendFns[gridId] || []
         lfs[id] = {
             legend: overlay.legend,
-            legendHtml: overlay.legendHtml
+            legendHtml: overlay.legendHtml,
+            noLegend: overlay.noLegend ?? false
         }
 
         // Value trackers
@@ -117,6 +121,7 @@ class MetaHub {
         this.autoPrecisions = [] // wait for preSamplers
         //this.restore()
         this.calcOhlcMap()
+        this.ready = true
         setTimeout(() => {
             this.events.emitSpec('chart', 'update-layout')
             this.events.emit('update-legend')
@@ -215,6 +220,11 @@ class MetaHub {
             index: undefined,
             ov: undefined
         })
+    }
+
+    // Overlay/user set lock on scrolling
+    onScrollLock(event) {
+        this.scrollLock = event
     }
 }
 

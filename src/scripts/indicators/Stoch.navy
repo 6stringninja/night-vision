@@ -1,5 +1,5 @@
 
-// Navy ~ 0.1-lite
+// Navy ~ 0.2-lite
 // <ds>Stochastic</ds>, format: [<timestamp>, <kLine>, <dLine>]
 
 [OVERLAY name=Stoch, version=1.0.0]
@@ -56,7 +56,7 @@ draw(ctx) {
     ctx.stroke()
 }
 
-yRange(hi, lo) => [
+yRange(data, hi, lo) => [
     Math.max(hi, $props.upperBand),
     Math.min(lo, $props.lowerBand)
 ]

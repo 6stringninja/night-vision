@@ -96,6 +96,7 @@ function detachInputs() {
 function destroyLayers() {
     for (var layer of layers) {
         layer.overlay.destroy()
+        layer.env.destroy()
     }
 }
 
@@ -134,8 +135,8 @@ function makeLayers() {
     // TODO: make crosshair customizable
     // TODO: check order if overlay list is changed
     // TODO: switch Grid/X from the pane settings
-    layers.push(new Crosshair(i++))
-    layers.push(new Grid(i++))
+    layers.push(new Crosshair(i++, props.id))
+    layers.push(new Grid(i++, props.id))
     layers.push(new Trackers(i++, props, id))
     layers.sort((l1, l2) => l1.zIndex - l2.zIndex)
 
@@ -179,6 +180,10 @@ function update($layout = layout) {
         l.env.update(l.ovSrc, layout, props)
         l.update()
     }
+    // Prevent drawing before meta data extracted
+    // from the scripts
+    // if (!meta.ready) return
+    // Now draw
     for (var rr of renderers) {
         events.emitSpec(`rr-${id}-${rr.id}`,
             'update-rr', layout)
@@ -191,15 +196,12 @@ function propagate(e) {
         if (layer.overlay[name]) {
             layer.overlay[name](event)
         }
-        // TODO: reimplement
-        /*const mouse = layer.overlay.mouse
-        const keys = layer.overlay.keys
-        if (mouse.listeners) {
+        if (layer.env.$core) {
+            const mouse = layer.env.$core.mouse
+            const keys = layer.env.$core.keys
             mouse.emit(name, event)
-        }
-        if (keys && keys.listeners) {
             keys.emit(name, event)
-        }*/
+        }
     }
 }
 
@@ -210,7 +212,6 @@ function onTask(event) {
 
 </script>
 <style>
-.nvjs-grid {}
 </style>
 <div class="nvjs-grid" {style}>
     {#each renderers as rr, i}

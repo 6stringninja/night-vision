@@ -175,6 +175,7 @@ export default class Input {
 
     mousemove(event) {
         if (Utils.isMobile) return
+        event = Utils.adjustMouse(event, this.canvas)
         this.events.emit('cursor-changed', {
             visible: true,
             gridId: this.gridId,
@@ -187,17 +188,20 @@ export default class Input {
 
     mouseout(event) {
         if (Utils.isMobile) return
+        event = Utils.adjustMouse(event, this.canvas)
         this.events.emit('cursor-changed', { visible: false })
         this.propagate('mouseout', event)
     }
 
     mouseup(event) {
+        event = Utils.adjustMouse(event, this.canvas)
         this.drug = null
         this.events.emit('cursor-locked', false)
         this.propagate('mouseup', event)
     }
 
     mousedown(event) {
+        event = Utils.adjustMouse(event, this.canvas)
         if (Utils.isMobile) return
         this.events.emit('cursor-locked', true)
         this.propagate('mousedown', event)
@@ -207,6 +211,7 @@ export default class Input {
 
     // Simulated mousedown (for mobile)
    simMousedown(event) {
+       event = Utils.adjustMouse(event, this.canvas)
        if (event.srcEvent.defaultPrevented) return
        this.events.emit('grid-mousedown', [this.gridId, event])
        this.propagate('mousemove', this.touch2mouse(event))
@@ -267,6 +272,8 @@ export default class Input {
    }
 
    mousezoom(delta, event) {
+
+        if (this.meta.scrollLock) return
 
         // TODO: for mobile
         if (this.wmode !== 'pass') {
@@ -333,6 +340,8 @@ export default class Input {
 
     mousedrag(x, y) {
 
+        if (this.meta.scrollLock) return
+
         let dt = this.drug.t * (this.drug.x - x) / this.layout.width
         let d$ = this.layout.$hi - this.layout.$lo
         d$ *= (this.drug.y - y) / this.layout.height
@@ -372,6 +381,8 @@ export default class Input {
 
     pinchZoom(scale) {
 
+        if (this.meta.scrollLock) return
+
         let data = this.hub.mainOv.dataSubset
 
         if (scale > 1 && data.length <= this.MIN_ZOOM) return
@@ -388,6 +399,8 @@ export default class Input {
     }
 
     trackpadScroll(event) {
+
+        if (this.meta.scrollLock) return
 
         let dt = this.range[1] - this.range[0]
 

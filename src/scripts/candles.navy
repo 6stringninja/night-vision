@@ -1,5 +1,5 @@
 
-// NavyJS ~ 0.1-lite
+// NavyJS ~ 0.2-lite
 
 // <ds>Standart japanese candles</ds>, format:
 // [<timestamp>, <open>, <high>, <low>, <close>, <?volume>]
@@ -57,10 +57,7 @@ drawCvPart(ctx, f, arr, w, color) {
 }
 
 // Define y-range (by finding max High, min Low)
-yRange() {
-    // Getting updated data faster
-    // (we need 1 more update when using $core.dataSubset)
-    let data = $core.hub.ovDataSubset($core.paneId, $core.id)
+static yRange(data) {
     let len = data.length
     var h, l, high = -Infinity, low = Infinity
     for(var i = 0; i < len; i++) {
@@ -72,7 +69,7 @@ yRange() {
 }
 
 // Use [Open, Close] for precision detection
-preSampler(x) => [x[1], x[4]]
+static preSampler(x) => [x[1], x[4]]
 
 // Map data item to OHLC (for candle magnets etc.)
 ohlc(x) => [x[1], x[2], x[3], x[4]]

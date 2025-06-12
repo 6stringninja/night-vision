@@ -1,6 +1,6 @@
 {
   "name": "night-vision",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Highly customizable charting library, created for professional traders",
   "homepage": "https://github.com/project-nv/night-vision",
   "type": "module",
@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build && node ./types/build-script.cjs",
+    "build-cdn": "vite build --config vite.cdn.config.js",
     "preview": "vite preview"
   },
   "main": "./dist/night-vision.js",
@@ -27,14 +28,14 @@
     "arrayslicer": "^1.2.3",
     "hammerjs": "^2.0.8",
     "hamsterjs": "^1.1.3",
-    "lz-string": "^1.4.4",
+    "lz-string": "^1.5.0",
     "moment": "^2.29.4",
-    "svelte": "^3.50.1"
+    "svelte": "^4.2.0"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.0.9",
-    "vite": "^3.1.8",
-    "vite-plugin-banner": "^0.5.0",
-    "ws": "^8.11.0"
+    "@sveltejs/vite-plugin-svelte": "^2.4.5",
+    "vite": "^4.5.0",
+    "vite-plugin-banner": "^0.7.1",
+    "ws": "^8.14.2"
   }
 }
